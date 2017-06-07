@@ -12,15 +12,12 @@ public class Main {
 	 * Application Launches here
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Gui frame = new Gui();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		EventQueue.invokeLater(() -> {
+			try {
+				Gui frame = new Gui();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
