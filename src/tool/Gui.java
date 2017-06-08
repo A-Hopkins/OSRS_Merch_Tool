@@ -1062,7 +1062,7 @@ public class Gui extends JFrame {
 		return s.replaceAll(",", "");
 	}
 
-	private void saveAll() {
+	public void saveAll() {
 		try {
 			this.save(this);
 			this.reload(this);
@@ -1088,7 +1088,7 @@ public class Gui extends JFrame {
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
-	public static Object formatNumber(int id) {
-		return null;
+	public static String formatNumber(double number) {
+		return NumberFormat.getInstance().format(number);
 	}
 }
