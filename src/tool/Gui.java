@@ -2,6 +2,7 @@ package tool;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+
 import entry.EntryInstance;
 import entry.table.AbstractCalculationTable;
 import entry.table.AbstractEntryTable;
@@ -13,6 +14,7 @@ import item.osbuddy.table.detailed.runescape.RunescapeItemInstance;
 import item.osbuddy.table.detailed.runescape.graph.RunescapeGraphInstance;
 
 import javax.imageio.ImageIO;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -21,23 +23,27 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.net.URL;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,7 +56,6 @@ import java.util.List;
  */
 public class Gui extends JFrame {
 
-	private final JPanel pane;
 	private final JTextField buyingTextField;
 	private final JTextField sellingTextField;
 	private final JTextField amountTextField;
@@ -80,10 +85,7 @@ public class Gui extends JFrame {
 
 	private JPanel jpanel_1;
 
-	private RunescapeGraphInstance runescapeGraph;
-
 	private RunescapeItemInstance runescapeItem;
-	private String runescapeItemPath;
 
 	private JsonParser parser = new JsonParser();
 	private JsonElement object;
@@ -108,7 +110,7 @@ public class Gui extends JFrame {
 	 * @throws JsonIOException
 	 * @throws JsonSyntaxException
 	 */
-	public Gui() throws IOException, JsonIOException, JsonSyntaxException {
+	Gui() throws IOException, JsonIOException, JsonSyntaxException {
 
 		/*
 		 * General Application settings like size and title
@@ -123,7 +125,7 @@ public class Gui extends JFrame {
 		/*
 		 * Instancing a JPanel
 		 */
-		pane = new JPanel();
+		JPanel pane = new JPanel();
 		pane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		pane.setLayout(new BorderLayout(0, 0));
 
@@ -149,13 +151,12 @@ public class Gui extends JFrame {
 		 * Loads data from a .json file into an ArrayList instanced by EntryInstance
 		 */
 		Gson gson = new Gson();
-		ArrayList<EntryInstance> _entries = gson.fromJson(Files.newBufferedReader(Paths.get("data","items.json")), new TypeToken<List<EntryInstance>>() {
-		}.getType());
 
 		/*
 		 * Set our global ArrayList to the local one loaded from the .json file.
 		 */
-		this.entries = _entries;
+		this.entries = gson.fromJson(Files.newBufferedReader(Paths.get("data","items.json")), new TypeToken<List<EntryInstance>>() {
+		}.getType());
 
 		/*
 		 * Instance of a horizontal separator on the UI
@@ -486,14 +487,14 @@ public class Gui extends JFrame {
 		tableInsertButton.setBounds(552, 447, 130, 22);
 
 		tableInsertButton.addActionListener(arg0 -> {
-			entries.add(new EntryInstance(dateFormat.format(date), logEntryLabel.getText(),
+			entries.add(new EntryInstance(dateFormat.format(date), logEntryTextField.getText(),
 					Integer.parseInt(amountBoughtTextField.getText()),
 					soldForTextField.getText().equals("") ? 1 : Integer.parseInt(soldForTextField.getText()),
 					Integer.parseInt(amountSoldTextField.getText())));
 
 			Gui.this.saveAll();
 
-			logEntryLabel.setText("");
+			logEntryTextField.setText("");
 			amountBoughtTextField.setText("");
 			soldForTextField.setText("");
 			amountSoldTextField.setText("");
@@ -516,7 +517,7 @@ public class Gui extends JFrame {
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 				Component comp = super.prepareRenderer(renderer, row, column);
-				Object value = getModel().getValueAt(row, column);
+				getModel().getValueAt(row, column);
 				comp.setForeground(Color.BLACK);
 				return comp;
 			}
@@ -641,7 +642,7 @@ public class Gui extends JFrame {
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 				Component comp = super.prepareRenderer(renderer, row, column);
-				Object value = getModel().getValueAt(row, column);
+				getModel().getValueAt(row, column);
 				comp.setForeground(Color.BLACK);
 				return comp;
 			}
@@ -749,14 +750,11 @@ public class Gui extends JFrame {
 
 			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						rowAtPoint_1 = table_2
-								.rowAtPoint(SwingUtilities.convertPoint(popupMenu_1, new Point(0, 0), table_2));
-						if (rowAtPoint_1 > -1) {
-							table_2.setRowSelectionInterval(rowAtPoint_1, rowAtPoint_1);
-						}
+				SwingUtilities.invokeLater(() -> {
+					rowAtPoint_1 = table_2
+							.rowAtPoint(SwingUtilities.convertPoint(popupMenu_1, new Point(0, 0), table_2));
+					if (rowAtPoint_1 > -1) {
+						table_2.setRowSelectionInterval(rowAtPoint_1, rowAtPoint_1);
 					}
 				});
 			}
@@ -772,98 +770,89 @@ public class Gui extends JFrame {
 			}
 		});
 
-		searchJagex.addActionListener(new ActionListener() {
+		searchJagex.addActionListener(e -> EventQueue.invokeLater(() -> {
+			try {
+				if (picLabel != null || nameLabel != null || idLabel != null || descriptionLabel != null || membersLabel != null
+						|| currentTrendLabel != null || todaysTrendLabel != null || thirtyDayTrendLabel != null || ninetyDayTrendLabel != null
+						|| oneHundredEightyDayTrendLabel != null || typeLabel != null) {
+					assert picLabel != null;
+					jpanel_1.remove(picLabel);
+					jpanel_1.remove(nameLabel);
+					jpanel_1.remove(idLabel);
+					jpanel_1.remove(descriptionLabel);
+					jpanel_1.remove(membersLabel);
+					jpanel_1.remove(typeLabel);
+					jpanel_1.remove(currentTrendLabel);
+					jpanel_1.remove(todaysTrendLabel);
+					jpanel_1.remove(thirtyDayTrendLabel);
+					jpanel_1.remove(ninetyDayTrendLabel);
+					jpanel_1.remove(oneHundredEightyDayTrendLabel);
+				}
+				object = parser.parse(new BufferedReader(new InputStreamReader(new URL(ItemInstanceConstants.getRunescapeItemInstanceDetails(Integer.parseInt(Gui.unformatNumber(String.valueOf(itemTable.getValueAt(rowAtPoint_1, 0)))))).openStream())));
+				runescapeItem = gson_3.fromJson(object.getAsJsonObject().get("item"), RunescapeItemInstance.class);
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
+				object = parser.parse(new BufferedReader(new InputStreamReader(new URL(ItemInstanceConstants.getRunescapeItemInstanceGraphDetails(Integer.parseInt(Gui.unformatNumber(String.valueOf(itemTable.getValueAt(rowAtPoint_1, 0)))))).openStream())));
+				gson_3.fromJson(object, RunescapeGraphInstance.class);
 
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						try {
-							if (picLabel != null || nameLabel != null || idLabel != null || descriptionLabel != null || membersLabel != null
-									|| currentTrendLabel != null || todaysTrendLabel != null || thirtyDayTrendLabel != null || ninetyDayTrendLabel != null
-									|| oneHundredEightyDayTrendLabel != null || typeLabel != null) {
-								jpanel_1.remove(picLabel);
-								jpanel_1.remove(nameLabel);
-								jpanel_1.remove(idLabel);
-								jpanel_1.remove(descriptionLabel);
-								jpanel_1.remove(membersLabel);
-								jpanel_1.remove(typeLabel);
-								jpanel_1.remove(currentTrendLabel);
-								jpanel_1.remove(todaysTrendLabel);
-								jpanel_1.remove(thirtyDayTrendLabel);
-								jpanel_1.remove(ninetyDayTrendLabel);
-								jpanel_1.remove(oneHundredEightyDayTrendLabel);
-							}
-							object = parser.parse(new BufferedReader(new InputStreamReader(new URL(ItemInstanceConstants.getRunescapeItemInstanceDetails(Integer.parseInt(Gui.unformatNumber(String.valueOf(itemTable.getValueAt(rowAtPoint_1, 0)))))).openStream())));
-							runescapeItem = gson_3.fromJson(object.getAsJsonObject().get("item"), RunescapeItemInstance.class);
+				image = ImageIO.read(new URL(runescapeItem.getLargeIcon()));
+				picLabel = new JLabel(new ImageIcon(image));
+				jpanel_1.add(picLabel).setBounds(5, 5, 96, 96);
 
-							object = parser.parse(new BufferedReader(new InputStreamReader(new URL(ItemInstanceConstants.getRunescapeItemInstanceGraphDetails(Integer.parseInt(Gui.unformatNumber(String.valueOf(itemTable.getValueAt(rowAtPoint_1, 0)))))).openStream())));
-							runescapeGraph = gson_3.fromJson(object, RunescapeGraphInstance.class);
+				nameLabel = new JLabel(runescapeItem.getName());
+				nameLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
+				jpanel_1.add(nameLabel).setBounds(195, 5, nameLabel.getText().length() * 13, 20);
 
-							image = ImageIO.read(new URL(runescapeItem.getLargeIcon()));
-							picLabel = new JLabel(new ImageIcon(image));
-							jpanel_1.add(picLabel).setBounds(5, 5, 96, 96);
+				idLabel = new JLabel(String.valueOf(runescapeItem.getId()));
+				idLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+				jpanel_1.add(idLabel).setBounds(40, 106, nameLabel.getText().length() * 13, 20);
 
-							nameLabel = new JLabel(runescapeItem.getName());
-							nameLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-							jpanel_1.add(nameLabel).setBounds(195, 5, nameLabel.getText().length() * 13, 20);
+				descriptionLabel = new JLabel(runescapeItem.getDescription());
+				descriptionLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
+				jpanel_1.add(descriptionLabel).setBounds(232, 30, descriptionLabel.getText().length() * 13, 20);
 
-							idLabel = new JLabel(String.valueOf(runescapeItem.getId()));
-							idLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-							jpanel_1.add(idLabel).setBounds(40, 106, nameLabel.getText().length() * 13, 20);
+				membersLabel = new JLabel(String.valueOf(runescapeItem.isMembersItem()));
+				membersLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
+				jpanel_1.add(membersLabel).setBounds(252, 55, membersLabel.getText().length() * 13, 20);
 
-							descriptionLabel = new JLabel(runescapeItem.getDescription());
-							descriptionLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-							jpanel_1.add(descriptionLabel).setBounds(232, 30, descriptionLabel.getText().length() * 13, 20);
+				typeLabel = new JLabel(runescapeItem.getType());
+				typeLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
+				jpanel_1.add(typeLabel).setBounds(190, 80, typeLabel.getText().length() * 13, 20);
 
-							membersLabel = new JLabel(String.valueOf(runescapeItem.isMembersItem()));
-							membersLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-							jpanel_1.add(membersLabel).setBounds(252, 55, membersLabel.getText().length() * 13, 20);
+				currentTrendLabel = new JLabel(runescapeItem.getCurrentTrend().getTrend() + ", " + runescapeItem.getCurrentTrend().getPrice());
+				currentTrendLabel.setForeground(runescapeItem.getCurrentTrend().getTrend().contains("negative") ? Color.RED :
+						runescapeItem.getCurrentTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
+				currentTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+				jpanel_1.add(currentTrendLabel).setBounds(120, 150, currentTrendLabel.getText().length() * 16, 20);
 
-							typeLabel = new JLabel(runescapeItem.getType());
-							typeLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-							jpanel_1.add(typeLabel).setBounds(190, 80, typeLabel.getText().length() * 13, 20);
+				todaysTrendLabel = new JLabel(runescapeItem.getTodaysTrend().getTrend() + ", " + runescapeItem.getTodaysTrend().getPrice());
+				todaysTrendLabel.setForeground(runescapeItem.getTodaysTrend().getTrend().contains("negative") ? Color.RED :
+						runescapeItem.getTodaysTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
+				todaysTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+				jpanel_1.add(todaysTrendLabel).setBounds(510, 150, todaysTrendLabel.getText().length() * 16, 20);
 
-							currentTrendLabel = new JLabel(runescapeItem.getCurrentTrend().getTrend() + ", " + runescapeItem.getCurrentTrend().getPrice());
-							currentTrendLabel.setForeground(runescapeItem.getCurrentTrend().getTrend().contains("negative") ? Color.RED :
-									runescapeItem.getCurrentTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
-							currentTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-							jpanel_1.add(currentTrendLabel).setBounds(120, 150, currentTrendLabel.getText().length() * 16, 20);
+				thirtyDayTrendLabel = new JLabel(runescapeItem.getThirtyDayTrend().getTrend() + ", " + runescapeItem.getThirtyDayTrend().getChange());
+				thirtyDayTrendLabel.setForeground(runescapeItem.getThirtyDayTrend().getTrend().contains("negative") ? Color.RED :
+						runescapeItem.getThirtyDayTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
+				thirtyDayTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+				jpanel_1.add(thirtyDayTrendLabel).setBounds(60, 235, thirtyDayTrendLabel.getText().length() * 16, 20);
 
-							todaysTrendLabel = new JLabel(runescapeItem.getTodaysTrend().getTrend() + ", " + runescapeItem.getTodaysTrend().getPrice());
-							todaysTrendLabel.setForeground(runescapeItem.getTodaysTrend().getTrend().contains("negative") ? Color.RED :
-									runescapeItem.getTodaysTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
-							todaysTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-							jpanel_1.add(todaysTrendLabel).setBounds(510, 150, todaysTrendLabel.getText().length() * 16, 20);
+				ninetyDayTrendLabel = new JLabel(runescapeItem.getNinetyDayTrend().getTrend() + ", " + runescapeItem.getNinetyDayTrend().getChange());
+				ninetyDayTrendLabel.setForeground(runescapeItem.getNinetyDayTrend().getTrend().contains("negative") ? Color.RED :
+						runescapeItem.getNinetyDayTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
+				ninetyDayTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+				jpanel_1.add(ninetyDayTrendLabel).setBounds(310, 235, ninetyDayTrendLabel.getText().length() * 16, 20);
 
-							thirtyDayTrendLabel = new JLabel(runescapeItem.getThirtyDayTrend().getTrend() + ", " + runescapeItem.getThirtyDayTrend().getChange());
-							thirtyDayTrendLabel.setForeground(runescapeItem.getThirtyDayTrend().getTrend().contains("negative") ? Color.RED :
-									runescapeItem.getThirtyDayTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
-							thirtyDayTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-							jpanel_1.add(thirtyDayTrendLabel).setBounds(60, 235, thirtyDayTrendLabel.getText().length() * 16, 20);
+				oneHundredEightyDayTrendLabel = new JLabel(runescapeItem.getOneHundredEigthyDayTrend().getTrend() + ", " + runescapeItem.getOneHundredEigthyDayTrend().getChange());
+				oneHundredEightyDayTrendLabel.setForeground(runescapeItem.getOneHundredEigthyDayTrend().getTrend().contains("negative") ? Color.RED :
+						runescapeItem.getOneHundredEigthyDayTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
+				oneHundredEightyDayTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+				jpanel_1.add(oneHundredEightyDayTrendLabel).setBounds(550, 235, oneHundredEightyDayTrendLabel.getText().length() * 16, 20);
 
-							ninetyDayTrendLabel = new JLabel(runescapeItem.getNinetyDayTrend().getTrend() + ", " + runescapeItem.getNinetyDayTrend().getChange());
-							ninetyDayTrendLabel.setForeground(runescapeItem.getNinetyDayTrend().getTrend().contains("negative") ? Color.RED :
-									runescapeItem.getNinetyDayTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
-							ninetyDayTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-							jpanel_1.add(ninetyDayTrendLabel).setBounds(310, 235, ninetyDayTrendLabel.getText().length() * 16, 20);
-
-							oneHundredEightyDayTrendLabel = new JLabel(runescapeItem.getOneHundredEigthyDayTrend().getTrend() + ", " + runescapeItem.getOneHundredEigthyDayTrend().getChange());
-							oneHundredEightyDayTrendLabel.setForeground(runescapeItem.getOneHundredEigthyDayTrend().getTrend().contains("negative") ? Color.RED :
-									runescapeItem.getOneHundredEigthyDayTrend().getTrend().contains("positive") ? Color.GREEN : Color.BLACK);
-							oneHundredEightyDayTrendLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-							jpanel_1.add(oneHundredEightyDayTrendLabel).setBounds(550, 235, oneHundredEightyDayTrendLabel.getText().length() * 16, 20);
-
-							jpanel_1.repaint();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-					}
-				});
+				jpanel_1.repaint();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
-
-		});
+		}));
 
 		table_2.setComponentPopupMenu(popupMenu_1);
 
@@ -881,86 +870,78 @@ public class Gui extends JFrame {
 
 		osbuddyItems.add(checkBox);
 
-		JComboBox<String> searchParameters = new JComboBox<String>(new String[]{"Item ID", "Item Name", "Potential Profit"});
+		JComboBox<String> searchParameters = new JComboBox<>(new String[]{"Item ID", "Item Name", "Potential Profit"});
 		searchParameters.setBounds(140, 462, 120, 20);
 		osbuddyItems.add(searchParameters);
 
-		List<OSBuddyInstance> searchIndex = new ArrayList<OSBuddyInstance>();
-
-		AbstractOSBuddyItemsTable searchTable;
+		List<OSBuddyInstance> searchIndex = new ArrayList<>();
 
 		JButton button_3 = new JButton("Search");
 		button_3.setFont(new Font("Tahoma", Font.BOLD, 13));
-		button_3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if (searchParameters.getSelectedItem().equals("Item ID")) {
+		button_3.addActionListener(arg0 -> {
+			if (searchParameters.getSelectedItem().equals("Item ID")) {
+				if (!textField_8.getText().matches("\\d+")) {
+					JOptionPane.showMessageDialog(null, "You cannot search for Items via IDs while having letters within the search parameters!",
+							"An Error Occured!", JOptionPane.INFORMATION_MESSAGE, null);
+					return;
+				}
+				for (OSBuddyInstance item : items.values()) {
+					if (item.getId() == Integer.parseInt(textField_8.getText())) {
+						searchIndex.add(item);
+					}
+				}
+				itemTable = new AbstractOSBuddyItemsTable(searchIndex);
+				table_2.setModel(itemTable);
+			}
+			if (searchParameters.getSelectedItem().equals("Item Name")) {
+				for (OSBuddyInstance item : items.values()) {
+					if (item.getName().toLowerCase().contains(textField_8.getText().toLowerCase())) {
+						searchIndex.add(item);
+					}
+				}
+				itemTable = new AbstractOSBuddyItemsTable(searchIndex);
+				table_2.setModel(itemTable);
+			}
+			if (searchParameters.getSelectedItem().equals("Potential Profit"))
+				if (checkBox.isSelected()) {
 					if (!textField_8.getText().matches("\\d+")) {
-						JOptionPane.showMessageDialog(null, "You cannot search for Items via IDs while having letters within the search parameters!",
-								"An Error Occured!", 1, null);
+						JOptionPane.showMessageDialog(null, "You cannot search for items via potential while having letters within the search parameters!",
+								"An Error Occured!", JOptionPane.INFORMATION_MESSAGE, null);
 						return;
 					}
 					for (OSBuddyInstance item : items.values()) {
-						if (item.getId() == Integer.parseInt(textField_8.getText())) {
+						if (Math.subtractExact(item.getSellAverage(), item.getBuyAverage()) < Integer.parseInt(textField_8.getText())) {
 							searchIndex.add(item);
 						}
 					}
 					itemTable = new AbstractOSBuddyItemsTable(searchIndex);
 					table_2.setModel(itemTable);
-				}
-				if (searchParameters.getSelectedItem().equals("Item Name")) {
+				} else {
+					if (!textField_8.getText().matches("\\d+")) {
+						JOptionPane.showMessageDialog(null, "You cannot search for prices via potential while having letters within the search parameters!",
+								"An Error Occured!", JOptionPane.INFORMATION_MESSAGE, null);
+						return;
+					}
 					for (OSBuddyInstance item : items.values()) {
-						if (item.getName().toLowerCase().contains(textField_8.getText().toLowerCase())) {
+						if (Math.subtractExact(item.getSellAverage(), item.getBuyAverage()) > Integer.parseInt(textField_8.getText())) {
 							searchIndex.add(item);
 						}
 					}
 					itemTable = new AbstractOSBuddyItemsTable(searchIndex);
 					table_2.setModel(itemTable);
 				}
-				if (searchParameters.getSelectedItem().equals("Potential Profit"))
-					if (checkBox.isSelected()) {
-						if (!textField_8.getText().toString().matches("\\d+")) {
-							JOptionPane.showMessageDialog(null, "You cannot search for items via potential while having letters within the search parameters!",
-									"An Error Occured!", 1, null);
-							return;
-						}
-						for (OSBuddyInstance item : items.values()) {
-							if (Math.subtractExact(item.getSellAverage(), item.getBuyAverage()) < Integer.parseInt(textField_8.getText())) {
-								searchIndex.add(item);
-							}
-						}
-						itemTable = new AbstractOSBuddyItemsTable(searchIndex);
-						table_2.setModel(itemTable);
-					} else {
-						if (!textField_8.getText().toString().matches("\\d+")) {
-							JOptionPane.showMessageDialog(null, "You cannot search for prices via potential while having letters within the search parameters!",
-									"An Error Occured!", 1, null);
-							return;
-						}
-						for (OSBuddyInstance item : items.values()) {
-							if (Math.subtractExact(item.getSellAverage(), item.getBuyAverage()) > Integer.parseInt(textField_8.getText())) {
-								searchIndex.add(item);
-							}
-						}
-						itemTable = new AbstractOSBuddyItemsTable(searchIndex);
-						table_2.setModel(itemTable);
-					}
-				searchIndex.clear();
-				itemTable.fireTableDataChanged();
-			}
+			searchIndex.clear();
+			itemTable.fireTableDataChanged();
 		});
 		button_3.setBounds(270, 462, 130, 20);
 		osbuddyItems.add(button_3);
 
 		JButton button_4 = new JButton("Main Table");
 		button_4.setFont(new Font("Tahoma", Font.BOLD, 13));
-		button_4.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				itemTable = new AbstractOSBuddyItemsTable(items);
-				table_2.setModel(itemTable);
-				itemTable.fireTableDataChanged();
-			}
+		button_4.addActionListener(e -> {
+			itemTable = new AbstractOSBuddyItemsTable(items);
+			table_2.setModel(itemTable);
+			itemTable.fireTableDataChanged();
 		});
 
 		button_4.setBounds(410, 462, 130, 20);
@@ -968,19 +949,15 @@ public class Gui extends JFrame {
 
 		JButton button_5 = new JButton("Refresh Table");
 		button_5.setFont(new Font("Tahoma", Font.BOLD, 13));
-		button_5.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					items = gson_3.fromJson(new BufferedReader(new InputStreamReader(new URL("https://rsbuddy.com/exchange/summary.json").openStream())), new TypeToken<HashMap<Integer, OSBuddyInstance>>() {
-					}.getType());
-					itemTable = new AbstractOSBuddyItemsTable(items);
-					table_2.setModel(itemTable);
-					itemTable.fireTableDataChanged();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+		button_5.addActionListener(e -> {
+			try {
+				items = gson_3.fromJson(new BufferedReader(new InputStreamReader(new URL("https://rsbuddy.com/exchange/summary.json").openStream())), new TypeToken<HashMap<Integer, OSBuddyInstance>>() {
+				}.getType());
+				itemTable = new AbstractOSBuddyItemsTable(items);
+				table_2.setModel(itemTable);
+				itemTable.fireTableDataChanged();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
 		});
 
@@ -1066,7 +1043,8 @@ public class Gui extends JFrame {
 	public void saveAll() {
 		try {
 			this.save(this);
-			this.reload(this);
+			this.reload();
+
 			entryTable.fireTableDataChanged();
 			calculationTable.fireTableDataChanged();
 
@@ -1075,11 +1053,12 @@ public class Gui extends JFrame {
 		}
 	}
 
-	private void reload(Gui gui) throws IOException {
+	private void reload() throws IOException {
 		Gson gson = new Gson();
 
-		ArrayList<EntryInstance> entries = gson.fromJson(Files.newBufferedReader(Paths.get("data", "items.json")),
-				new TypeToken<List<EntryInstance>>(){}.getType());
+		gson.fromJson(Files.newBufferedReader(Paths.get("data", "items.json")),
+				new TypeToken<List<EntryInstance>>() {
+				}.getType());
 	}
 
 	private void save(Gui gui) throws IOException {

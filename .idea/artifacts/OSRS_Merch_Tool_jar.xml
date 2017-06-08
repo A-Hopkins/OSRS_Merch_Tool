@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="OSRS Merch Tool:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/OSRS_Merch_Tool_jar</output-path>
+    <root id="archive" name="OSRS Merch Tool.jar">
+      <element id="module-output" name="OSRS Merch Tool" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/gson-2.8.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
