@@ -1,8 +1,6 @@
 package tool;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import entry.EntryInstance;
 import entry.table.AbstractCalculationTable;
@@ -106,8 +104,11 @@ public class Gui extends JFrame {
 	/**
 	 *  Builds the UI of the Application and handles most of the processes.
 	 *
+	 * @throws IOException
+	 * @throws JsonIOException
+	 * @throws JsonSyntaxException
 	 */
-	public Gui() throws IOException {
+	public Gui() throws IOException, JsonIOException, JsonSyntaxException {
 
 		/*
 		 * General Application settings like size and title
