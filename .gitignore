@@ -119,3 +119,7 @@ OSRS Merch Tool.iml
 data/
 src/entry/
 src/item/
+!/src/entry/EntryInstance.java
+!/src/entry/
+!/data/
+!/src/item/osbuddy/table/
