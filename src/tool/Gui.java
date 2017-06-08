@@ -1,13 +1,20 @@
+package tool;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import entry.EntryInstance;
 import entry.table.AbstractCalculationTable;
 import entry.table.AbstractEntryTable;
+import entry.table.edit.EditEntry;
 import item.osbuddy.table.AbstractOSBuddyItemsTable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,7 +35,7 @@ import java.util.List;
 /**
  * Created by Alex on 6/7/2017.
  *
- * Gui Implementation class
+ * tool.Gui Implementation class
  */
 public class Gui extends JFrame {
 
@@ -41,17 +48,19 @@ public class Gui extends JFrame {
 	private final JTextField amountBoughtTextField;
 	private final JTextField soldForTextField;
 	private final JTextField amountSoldTextField;
+	private JTable table;
 
 	private ArrayList<EntryInstance> entries;
 	private AbstractEntryTable entryTable;
 	private AbstractCalculationTable calculationTable;
 	private AbstractOSBuddyItemsTable itemTable;
+	private int rowAtPoint;
 
 	/**
 	 *  Builds the UI of the Application and handles most of the processes.
 	 *
 	 */
-	Gui() throws IOException {
+	public Gui() throws IOException {
 
 		/*
 		 * General Application settings like size and title
@@ -441,6 +450,194 @@ public class Gui extends JFrame {
 			soldForTextField.setText("");
 			amountSoldTextField.setText("");
 		});
+
+		tablePanel.add(tableInsertButton);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 10, 760, 144);
+		scrollPane.setViewportBorder(new LineBorder(new Color(0, 0, 0)));
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		tablePanel.add(scrollPane);
+
+		table = new JTable();
+		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		table.setBorder(new MatteBorder(1, 1, 1, 1, new Color(0, 0, 0)));
+		entryTable = new AbstractEntryTable(this.entries);
+		table = new JTable(entryTable) {
+			
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+				Component comp = super.prepareRenderer(renderer, row, column);
+				Object value = getModel().getValueAt(row, column);
+				comp.setForeground(Color.BLACK);
+				return comp;
+			}
+		};
+		table.getTableHeader().setReorderingAllowed(false);
+		table.setColumnSelectionAllowed(false);
+		table.getTableHeader().setResizingAllowed(false);
+		table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
+		table.setModel(entryTable);
+
+		final JPopupMenu popupMenu = new JPopupMenu();
+		JMenuItem editItem = new JMenuItem("Edit Entry", new Icon() {
+			@Override
+			public void paintIcon(Component c, Graphics g, int x, int y) {
+
+			}
+
+			@Override
+			public int getIconWidth() {
+				return 0;
+			}
+
+			@Override
+			public int getIconHeight() {
+				return 0;
+			}
+		});
+		JMenuItem deleteItem = new JMenuItem("Delete Entry");
+		JMenuItem clearList = new JMenuItem("Clear Table");
+
+		popupMenu.add(editItem);
+		popupMenu.add(deleteItem);
+		popupMenu.add(clearList);
+
+		popupMenu.addPopupMenuListener(new PopupMenuListener() {
+
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						rowAtPoint = table
+								.rowAtPoint(SwingUtilities.convertPoint(popupMenu, new Point(0, 0), table));
+						if (rowAtPoint > -1) {
+							table.setRowSelectionInterval(rowAtPoint, rowAtPoint);
+						}
+					}
+				});
+			}
+
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+
+			}
+
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {
+
+			}
+		});
+
+		editItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							Object itemName = entryTable.getValueAt(table.getSelectedRow(), 1);
+							Object boughtAmount = entryTable.getValueAt(table.getSelectedRow(), 2);
+							Object soldAmount = entryTable.getValueAt(table.getSelectedRow(), 3);
+							Object itemAmount = entryTable.getValueAt(table.getSelectedRow(), 4);
+							EditEntry edit = new EditEntry(entryTable, table, Gui.this);
+							edit.textField.setText(itemName.toString());
+							edit.textField_1.setText(Gui.unformatNumber(boughtAmount.toString()));
+							edit.textField_2.setText(Gui.unformatNumber(soldAmount.toString()));
+							edit.textField_3.setText(Gui.unformatNumber(itemAmount.toString()));
+
+							edit.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+							edit.setVisible(true);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+
+		});
+
+		deleteItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (rowAtPoint > -1) {
+					entries.remove(rowAtPoint);
+				}
+
+				Gui.this.saveAll();
+
+			}
+		});
+
+		clearList.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				int selectedOption = JOptionPane.showConfirmDialog(null,
+						"By deleting the table, you will be\n" +
+								"irreversably deleting all data and \n" +
+								"will not be recoverable.",
+						"Are you sure?",
+						JOptionPane.YES_NO_OPTION);
+				if (selectedOption == JOptionPane.YES_OPTION) {
+					entries.clear();
+					Gui.this.saveAll();
+				}
+
+			}
+		});
+
+		table.setComponentPopupMenu(popupMenu);
+		table.setModel(entryTable);
+
+		table.getColumnModel().getColumn(0).setPreferredWidth(85);
+		table.getColumnModel().getColumn(1).setPreferredWidth(62);
+		table.getColumnModel().getColumn(2).setPreferredWidth(70);
+		table.getColumnModel().getColumn(3).setPreferredWidth(70);
+		table.getColumnModel().getColumn(4).setPreferredWidth(70);
+		table.getColumnModel().getColumn(5).setPreferredWidth(90);
+		scrollPane.setViewportView(table);
+
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setViewportBorder(new LineBorder(new Color(0, 0, 0)));
+		scrollPane_1.setBounds(10, 160, 760, 52);
+		scrollPane_1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		tablePanel.add(scrollPane_1);
+		calculationTable = new AbstractCalculationTable(this.entries);
+		JTable table_1 = new JTable(calculationTable) {
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+				Component comp = super.prepareRenderer(renderer, row, column);
+				Object value = getModel().getValueAt(row, column);
+				comp.setForeground(Color.BLACK);
+				return comp;
+			}
+		};
+
+		table_1.getTableHeader().setReorderingAllowed(false);
+		table_1.getTableHeader().setResizingAllowed(false);
+		table_1.setRowSelectionAllowed(false);
+		table_1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
+		table_1.setModel(calculationTable);
+
+		table_1.getColumnModel().getColumn(0).setPreferredWidth(99);
+		table_1.getColumnModel().getColumn(1).setPreferredWidth(120);
+		table_1.getColumnModel().getColumn(2).setPreferredWidth(127);
+		table_1.getColumnModel().getColumn(3).setPreferredWidth(93);
+		table_1.getColumnModel().getColumn(4).setPreferredWidth(81);
+		table_1.setRowHeight(22);
+		scrollPane_1.setViewportView(table_1);
+	}
+
+	private static String unformatNumber(String s) {
+		return s.replaceAll(",", "");
 	}
 
 	private void saveAll() {

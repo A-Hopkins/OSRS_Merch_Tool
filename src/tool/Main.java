@@ -1,10 +1,11 @@
+package tool;
 
 import java.awt.*;
 
 /**
  * Created by Alex on 6/7/2017.
  *
- * Main class for OSRS Merch Tool. Starts the Gui
+ * tool.Main class for OSRS Merch Tool. Starts the tool.Gui
  */
 public class Main {
 
