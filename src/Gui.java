@@ -14,8 +14,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -441,18 +443,29 @@ public class Gui extends JFrame {
 		});
 	}
 
-	public void saveAll() {
-		this.save(this);
-		this.reload(this);
-		entryTable.fireTableDataChanged();
-		calculationTable.fireTableDataChanged();
+	private void saveAll() {
+		try {
+			this.save(this);
+			this.reload(this);
+			entryTable.fireTableDataChanged();
+			calculationTable.fireTableDataChanged();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	private void reload(Gui gui) {
+	private void reload(Gui gui) throws IOException {
+		Gson gson = new Gson();
 
+		ArrayList<EntryInstance> entries = gson.fromJson(Files.newBufferedReader(Paths.get("data", "items.json")),
+				new TypeToken<List<EntryInstance>>(){}.getType());
 	}
 
-	private void save(Gui gui) {
+	private void save(Gui gui) throws IOException {
+		Gson gson = new Gson();
 
+		Files.write(Paths.get("data", "items.json"), gson.toJson(gui.entries).getBytes(StandardCharsets.UTF_8),
+				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 }
