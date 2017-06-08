@@ -12,6 +12,7 @@ import item.osbuddy.table.AbstractOSBuddyItemsTable;
 import item.osbuddy.table.detailed.ItemInstanceConstants;
 import item.osbuddy.table.detailed.runescape.RunescapeItemInstance;
 import item.osbuddy.table.detailed.runescape.graph.RunescapeGraphInstance;
+import tool.IOManager.FileManager;
 
 import javax.imageio.ImageIO;
 
@@ -36,9 +37,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -103,6 +102,7 @@ public class Gui extends JFrame {
 	private JLabel oneHundredEightyDayTrendLabel;
 	private JLabel typeLabel;
 
+
 	/**
 	 *  Builds the UI of the Application and handles most of the processes.
 	 *
@@ -112,6 +112,14 @@ public class Gui extends JFrame {
 	 */
 	Gui() throws IOException, JsonIOException, JsonSyntaxException {
 
+		/*
+		 * Sets the UI theme of the application.
+		 */
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | UnsupportedLookAndFeelException | InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 		/*
 		 * General Application settings like size and title
 		 */
@@ -151,11 +159,11 @@ public class Gui extends JFrame {
 		 * Loads data from a .json file into an ArrayList instanced by EntryInstance
 		 */
 		Gson gson = new Gson();
-
+		new FileManager();
 		/*
 		 * Set our global ArrayList to the local one loaded from the .json file.
 		 */
-		this.entries = gson.fromJson(Files.newBufferedReader(Paths.get("data","items.json")), new TypeToken<List<EntryInstance>>() {
+		this.entries = gson.fromJson(Files.newBufferedReader(Paths.get(System.getenv("APPDATA") + "\\" + "OSRS Merch Tool", "items.json")), new TypeToken<List<EntryInstance>>() {
 		}.getType());
 
 		/*
@@ -1056,7 +1064,7 @@ public class Gui extends JFrame {
 	private void reload() throws IOException {
 		Gson gson = new Gson();
 
-		gson.fromJson(Files.newBufferedReader(Paths.get("data", "items.json")),
+		gson.fromJson(Files.newBufferedReader(Paths.get(System.getenv("APPDATA") + "\\" + "OSRS Merch Tool", "items.json")),
 				new TypeToken<List<EntryInstance>>() {
 				}.getType());
 	}
@@ -1064,7 +1072,7 @@ public class Gui extends JFrame {
 	private void save(Gui gui) throws IOException {
 		Gson gson = new Gson();
 
-		Files.write(Paths.get("data", "items.json"), gson.toJson(gui.entries).getBytes(StandardCharsets.UTF_8),
+		Files.write(Paths.get(System.getenv("APPDATA") + "\\" + "OSRS Merch Tool", "items.json"), gson.toJson(gui.entries).getBytes(StandardCharsets.UTF_8),
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
