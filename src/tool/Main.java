@@ -1,9 +1,6 @@
 package tool;
 
-import tool.IOManager.FileManager;
-
 import java.awt.*;
-import java.io.File;
 
 /**
  * Created by Alex on 6/7/2017.

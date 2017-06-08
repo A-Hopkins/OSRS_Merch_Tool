@@ -1,6 +1,7 @@
 package tool.IOManager;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -13,47 +14,36 @@ public class FileManager {
 
 		String FileFolder = System.getenv("APPDATA") + "\\" + "OSRS Merch Tool";
 
-		System.out.println("Searching for system");
-
 		String os = System.getProperty("os.name").toUpperCase();
 		if (os.contains("WIN")) {
 			FileFolder = System.getenv("APPDATA") + "\\" + "OSRS Merch Tool";
-			System.out.println("Found windows");
 		}
 		if (os.contains("MAC")) {
 			FileFolder = System.getProperty("user.home") + "/Library/Application " + "Support"
 					+ "OSRS Merch Tool";
-			System.out.println("Found mac");
 		}
 		if (os.contains("NUX")) {
 			FileFolder = System.getProperty("user.dir") + ".OSRS Merch Tool";
-			System.out.println("Found linux");
 		}
 
-		System.out.println("Searching for resource folder");
 		File directory = new File(FileFolder);
 
-		if (directory.exists()) {
-			System.out.println("Found folder");
-		}
-		else {
+		if (!directory.exists()) {
 			//noinspection ResultOfMethodCallIgnored
 			directory.mkdir();
-			System.out.println("Could not find folder so created it");
 		}
 
 		try {
-			// TODO Make this write an empty JSON on creation
 			File file = new File(FileFolder + "\\" + "items.json");
 
 			if (file.createNewFile()){
 
-				System.out.println("File is created!");
+				FileWriter fileWriter = new FileWriter(file);
+				String emptyJson = "[]";
 
-			}else{
-				System.out.println("File already exists.");
+				fileWriter.write(emptyJson);
+				fileWriter.close();
 			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
