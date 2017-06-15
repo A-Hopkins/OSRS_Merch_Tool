@@ -116,13 +116,5 @@ hs_err_pid*
 .idea/misc.xml
 .idea/modules.xml
 OSRS Merch Tool.iml
-data/
-src/entry/
-src/item/
-!/src/entry/EntryInstance.java
-!/src/entry/
-!/data/
-!/src/item/osbuddy/table/
 !/lib/gson-2.8.1.jar
 !/lib/JTattoo-1.6.11.jar
-!/lib/
