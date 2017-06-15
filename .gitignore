@@ -118,3 +118,4 @@ hs_err_pid*
 OSRS Merch Tool.iml
 !/lib/gson-2.8.1.jar
 !/lib/JTattoo-1.6.11.jar
+!/.idea/modules.xml
